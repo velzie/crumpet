@@ -52,16 +52,18 @@ startui(){
   while read cookie; do
     inside_chronos xauth -f '~/.Xauthority' add $cookie
   done <<< "$(xauth list)"
-  cp "$DIR/kiosk.sh" "$ROOTFS/opt/google/chrome"
-  cp "$DIR/launch.sh" "$ROOTFS/opt/google/chrome"
+  cp "$DIR/scripts/kiosk.sh" "$ROOTFS/opt/google/chrome"
+  cp "$DIR/scripts/launch.sh" "$ROOTFS/opt/google/chrome"
   chvt "$TTY"
   echo $$ > /tmp/crumpet-ash-pid
+  export DISPLAY
   inside_chronos /opt/google/chrome/launch.sh
 }
 
 xserver_poststart(){
   echo "DISPLAY=$DISPLAY">/tmp/crumpet-x
   echo $$ > /tmp/crumpet-pid
+  xhost +
   chvt "$1"
   tail -f /dev/null
 }
@@ -77,7 +79,9 @@ activate(){
 }
 
 enter-chroot(){
-  activate
+  if ! [ -f /tmp/crumpet-pid ] || ! [ -d "/proc/$(</tmp/crumpet-pid)/" ]; then
+    echo "X Server inactive. Run 'crumpet activate' to activate the chroot"
+  fi
   inside_chronos bash
 }
 
