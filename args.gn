@@ -1,0 +1,9 @@
+# args i used to build the ash thingy
+ozone_platform_drm = true
+ozone_platform_x11 = true
+target_os = "chromeos"
+is_debug=false
+enable_nacl=false
+symbol_level=0
+blink_symbol_level=0
+is_component_build=false
