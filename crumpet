@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ROOTFS=/home/ce/chromiumos/src/build/images/amd64-generic/R116-15507.0.0-d2023_06_20_143502-a1/rootfs
+ROOTFS=/rootfs
+TARBALL_URL=https://dl.sh1mmer.me/crumpet/rootfs.tar.gz
 TTY=9
 SELF=$(realpath "$0")
 DIR=$(dirname "$SELF")
@@ -43,9 +44,15 @@ xserver(){
 stop(){
   kill $(</tmp/crumpet-pid)
   kill $(</tmp/crumpet-ash-pid)
+  pkill -f chrome_silly
 }
 
 startui(){
+  if ! isactive; then
+    echo "X Server inactive. Run 'crumpet activate' to activate the chroot"
+    return
+  fi
+
   . /tmp/crumpet-x
   inside_chronos rm '~/.Xauthority'
   inside_chronos touch '~/.Xauthority'
@@ -68,23 +75,48 @@ xserver_poststart(){
   tail -f /dev/null
 }
 
-
+isactive(){
+ [ -f /tmp/crumpet-pid ] && [ -d "/proc/$(</tmp/crumpet-pid)/" ]
+}
 
 activate(){
   mnt
-  if ! [ -f /tmp/crumpet-pid ] || ! [ -d "/proc/$(</tmp/crumpet-pid)/" ]; then
+  if ! isactive; then
     xserver 
     echo "X server started! Launch ash with 'crumpet startui', outside of the chroot "
   fi
 }
 
 enter-chroot(){
-  if ! [ -f /tmp/crumpet-pid ] || ! [ -d "/proc/$(</tmp/crumpet-pid)/" ]; then
+  mnt
+  if ! isactive; then
     echo "X Server inactive. Run 'crumpet activate' to activate the chroot"
   fi
   inside_chronos bash
 }
 
+help(){
+ cat <<-EOF
+Usage: sudo ./crumpet [command]
+
+activate - activates the environment. usually you want to run this before you run some of the other commands
+startui - launches and switches to the chromiumos UI
+enter-chroot - gives you a shell inside the chroot
+inside - runs a single command inside the chroot (as root)
+inside_chronos - runs a single command inside the chroot (as chronos)
+help - prints this screen
+EOF
+}
+
+install(){
+  mkdir "$ROOTFS"
+  curl -SL "$TARBALL_URL" | tar -xvzf - -C "/"
+  mkdir -p "$ROOTFS/home/chronos/user"
+  chown -R 1000:1000 "$ROOTFS/home/chronos"
+
+  echo "installed!"
+}
 
 
-$@
+test -z "$@" && help
+$@ || help
