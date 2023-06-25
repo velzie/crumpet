@@ -46,3 +46,6 @@ If this accidentally breaks your terminal, sorry about that, `sudo mount -t devp
 I shouldn't need to explain the chroot part, it's just a standard chromiumos devimage build.
 The UI itself is built from ash-on-linux. DRI ended up being difficult inside a chroot so I fell back to a boring xorg kiosk for containing the UI. (see scripts/kiosk.sh)
 
+
+### Why does this download a random tarball from a sketchy site? I want to build it myself!
+see [[HACKING.md]] at your own risk
