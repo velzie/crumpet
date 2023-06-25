@@ -48,4 +48,4 @@ The UI itself is built from ash-on-linux. DRI ended up being difficult inside a 
 
 
 ### Why does this download a random tarball from a sketchy site? I want to build it myself!
-see [[HACKING.md]] at your own risk
+see [HACKING.md](./HACKING.md) at your own risk
